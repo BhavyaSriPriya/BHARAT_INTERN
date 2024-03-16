@@ -1,0 +1,68 @@
+// html 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Registration Form</title>
+  <link rel="stylesheet" href="style.css"> </head>
+<body>
+  <h1>Register</h1>
+  <form action="/register" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <br>
+    <label for="email">Email:</label>const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+// Replace with your MongoDB connection string
+const mongoURI = 'mongodb://localhost:27017/your_database_name';
+
+const app = express();
+
+// Connect to MongoDB
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error(err));
+
+// Define User Schema
+const UserSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// Body Parser Middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// Register Route
+app.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validate user data (optional)
+
+    const newUser = new User({ name, email, password });
+    await newUser.save();
+    res.send('Registration Successful!');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Registration Failed');
+  }
+});
+
+const port = process.env.PORT || 5000;
+
+app.listen(port, () => console.log(`Server running on port ${port}`));
+
+    <input type="email" id="email" name="email" required>
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <br>
+    <button type="submit">Register</button>
+  </form>
+</body>
+</html>
+
