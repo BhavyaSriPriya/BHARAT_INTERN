@@ -1,0 +1,93 @@
+// project structure
+mkdir blog_website
+cd blog_website
+npm init -y
+
+//dependecies
+npm install express mongoose ejs
+
+creating server
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/blog', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => console.error('Error connecting to MongoDB', err));
+
+// Define schema and model for posts
+const postSchema = new mongoose.Schema({
+  title: String,
+  content: String
+});
+
+const Post = mongoose.model('Post', postSchema);
+
+// Middleware
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.get('/', async (req, res) => {
+  const posts = await Post.find();
+  res.render('index', { posts });
+});
+
+app.get('/compose', (req, res) => {
+  res.render('compose');
+});
+
+app.post('/compose', async (req, res) => {
+  const { title, content } = req.body;
+  const post = new Post({ title, content });
+  await post.save();
+  res.redirect('/');
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog</title>
+</head>
+<body>
+  <h1>Blog Posts</h1>
+  <ul>
+    <% posts.forEach(post => { %>
+      <li>
+        <h2><%= post.title %></h2>
+        <p><%= post.content %></p>
+      </li>
+    <% }); %>
+  </ul>
+  <a href="/compose">Compose</a>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose</title>
+</head>
+<body>
+  <h1>Compose New Post</h1>
+  <form action="/compose" method="post">
+    <input type="text" name="title" placeholder="Title" required><br>
+    <textarea name="content" rows="10" cols="50" placeholder="Content" required></textarea><br>
+    <button type="submit">Publish</button>
+  </form>
+</body>
+</html>
